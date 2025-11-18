@@ -32,3 +32,9 @@ class AgileBasedLowerBodyActionCfg(ActionTermCfg):
 
     policy_output_scale: float = 1.0
     """Scales the output of the policy."""
+
+    preserve_order: bool = True
+    """Whether to preserve the order of joints as specified in joint_names."""
+
+    command_history_length: int = 1
+    """Number of times to repeat the command in the policy input. Defaults to 1 (no repetition)."""

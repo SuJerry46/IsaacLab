@@ -217,3 +217,80 @@ def task_done_exhaust_pipe(
     done = torch.logical_and(done, blue_exhaust_to_bin_z < max_blue_exhaust_to_bin_z)
 
     return done
+
+
+def task_done_pick_lift(
+    env: ManagerBasedRLEnv,
+    task_link_name: str = "",
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+    right_wrist_max_x: float = 0.26,
+    min_x: float = 0.40,
+    max_x: float = 0.85,
+    min_y: float = 0.35,
+    max_y: float = 0.60,
+    max_height: float = 1.10,
+    min_vel: float = 0.20,
+) -> torch.Tensor:
+    """Determine if the object placement task is complete.
+
+    This function checks whether all success conditions for the task have been met:
+    1. object is within the target x/y range
+    2. object is below a minimum height
+    3. object velocity is below threshold
+    4. Right robot wrist is retracted back towards body (past a given x pos threshold)
+
+    Args:
+        env: The RL environment instance.
+        object_cfg: Configuration for the object entity.
+        right_wrist_max_x: Maximum x position of the right wrist for task completion.
+        min_x: Minimum x position of the object for task completion.
+        max_x: Maximum x position of the object for task completion.
+        min_y: Minimum y position of the object for task completion.
+        max_y: Maximum y position of the object for task completion.
+        max_height: Maximum height (z position) of the object for task completion.
+        min_vel: Minimum velocity magnitude of the object for task completion.
+
+    Returns:
+        Boolean tensor indicating which environments have completed the task.
+    """
+    if task_link_name == "":
+        raise ValueError("task_link_name must be provided to task_done_pick_place")
+
+    # Get object entity from the scene
+    object: RigidObject = env.scene[object_cfg.name]
+
+    # Extract wheel position relative to environment origin
+    object_x = object.data.root_pos_w[:, 0] - env.scene.env_origins[:, 0]
+    object_y = object.data.root_pos_w[:, 1] - env.scene.env_origins[:, 1]
+    object_height = object.data.root_pos_w[:, 2] - env.scene.env_origins[:, 2]
+    object_vel = torch.abs(object.data.root_vel_w)
+
+    # Get right wrist position relative to environment origin
+    robot_body_pos_w = env.scene["robot"].data.body_pos_w
+    right_eef_idx = env.scene["robot"].data.body_names.index(task_link_name)
+    right_wrist_x = robot_body_pos_w[:, right_eef_idx, 0] - env.scene.env_origins[:, 0]
+
+    # Check all success conditions and combine with logical AND
+    # done = object_x < max_x
+    # done = torch.logical_and(done, object_x > min_x)
+    # done = torch.logical_and(done, object_y < max_y)
+    # done = torch.logical_and(done, object_y > min_y)
+    # done = torch.logical_and(done, object_height < max_height)
+    # done = torch.logical_and(done, right_wrist_x < right_wrist_max_x)
+    # done = torch.logical_and(done, object_vel[:, 0] < min_vel)
+    # done = torch.logical_and(done, object_vel[:, 1] < min_vel)
+    # done = torch.logical_and(done, object_vel[:, 2] < min_vel)
+
+
+    right_wrist_z = robot_body_pos_w[:, right_eef_idx, 2] - env.scene.env_origins[:, 2]
+    done = object_x < 0.1                                # 0.1    
+    done = torch.logical_and(done, object_x > -0.1)      # -0.1
+    done = torch.logical_and(done, object_height > 1.05)   # 1.05
+    #print("object_height:", object_height)
+    #done = torch.logical_and(done, right_wrist_z > 1.0)   # 手腕高度也要大于1.0
+    #print("right_wrist_z:", right_wrist_z)
+    done = torch.logical_and(done, object_vel[:, 0] < 0.08) # 0.08
+    done = torch.logical_and(done, object_vel[:, 1] < 0.08) # 0.08
+    done = torch.logical_and(done, object_vel[:, 2] < 0.08) # 0.08
+    #print("object_vel:", object_vel[:, 0], object_vel[:, 1], object_vel[:, 2], "\n")
+    return done

@@ -66,6 +66,17 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         ),
     )
 
+    purple_juice = RigidObjectCfg(
+        prim_path="{ENV_REGEX_NS}/PurpleJuice",
+        init_state=RigidObjectCfg.InitialStateCfg(pos=[-0.15, 0.5, 0.8], rot=[1, 0, 0, 0]),
+        spawn=UsdFileCfg(
+            usd_path="/workspace/isaaclab/source/isaaclab_assets/data/unitree_isaac/usd/g1_vla_stage/Item/purplejuice/purple_juice.usd",
+            scale=(1.0, 1.0, 1.0),
+            rigid_props=sim_utils.RigidBodyPropertiesCfg(),
+            # mass_props=MassPropertiesCfg(mass=0.08),  # Commented out - USD file has mass defined
+        ),
+    )
+
     blue_box = RigidObjectCfg(
         prim_path="{ENV_REGEX_NS}/BlueBox",
         init_state=RigidObjectCfg.InitialStateCfg(pos=[-0.15, 0.5, 0.8], rot=[1, 0, 0, 0]),
@@ -307,6 +318,9 @@ class ObservationsCfg:
         yellow_chip_pos = ObsTerm(func=base_mdp.root_pos_w, params={"asset_cfg": SceneEntityCfg("yellow_chip")})
         yellow_chip_rot = ObsTerm(func=base_mdp.root_quat_w, params={"asset_cfg": SceneEntityCfg("yellow_chip")})
 
+        purple_juice_pos = ObsTerm(func=base_mdp.root_pos_w, params={"asset_cfg": SceneEntityCfg("purple_juice")})
+        purple_juice_rot = ObsTerm(func=base_mdp.root_quat_w, params={"asset_cfg": SceneEntityCfg("purple_juice")})
+
         # Target container is static (kinematic), no need for observations
 
         robot_links_state = ObsTerm(func=mdp.get_all_robot_link_state)
@@ -315,8 +329,8 @@ class ObservationsCfg:
         left_eef_quat = ObsTerm(func=mdp.get_eef_quat, params={"link_name": "left_wrist_yaw_link"})
         right_eef_pos = ObsTerm(func=mdp.get_eef_pos, params={"link_name": "right_wrist_yaw_link"})
         right_eef_quat = ObsTerm(func=mdp.get_eef_quat, params={"link_name": "right_wrist_yaw_link"})
-
         hand_joint_state = ObsTerm(func=mdp.get_robot_joint_state, params={"joint_names": ["R_.*", "L_.*"]})
+
 
         # Detailed object observations for manipulation targets
         # object = ObsTerm(
@@ -377,18 +391,10 @@ class TerminationsCfg:
 
     # Success condition: object placed in container (container center at 0.5, 0.5, 0.8)
     success = DoneTerm(
-        func=mdp.task_done_pick_place,
+        func=mdp.task_done_pick_lift,
         params={
             "task_link_name": "right_wrist_yaw_link",
             "object_cfg": SceneEntityCfg(PRIMARY_OBJECT_NAME),
-            # Container center at (0.5, 0.5, 0.8), allow reasonable tolerance
-            "min_x": 0.35,           # Container center (0.5) - 0.15m tolerance
-            "max_x": 0.65,           # Container center (0.5) + 0.15m tolerance
-            "min_y": 0.35,           # Container center (0.5) - 0.15m tolerance
-            "max_y": 0.65,           # Container center (0.5) + 0.15m tolerance
-            "max_height": 0.95,      # Container center height (0.8) + 0.15m tolerance
-            "right_wrist_max_x": 0.30,  # Hand should retract back
-            "min_vel": 0.15,         # Object should be nearly stationary
         },
     )
     

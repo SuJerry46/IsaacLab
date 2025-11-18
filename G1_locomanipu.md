@@ -1,14 +1,38 @@
 
 ## collect demonstrations:
-
+### G1
 ```
-
 ./isaaclab.sh -p scripts/tools/record_demos.py \
 --device cpu \
 --task Isaac-PickPlace-Locomanipulation-G1-Abs-v0 \
 --teleop_device handtracking \
 --dataset_file ./datasets/locomanipu_G1/dataset_g1_locomanip.hdf5 \
 --num_demos 5 --enable_pinocchio
+
+./isaaclab.sh -p scripts/tools/record_demos.py \
+--device cpu \
+--task Isaac-PickPlace-FixedBaseUpperBodyIK-G1-Abs-v0 \
+--teleop_device handtracking \
+--dataset_file ./datasets/locomanipu_G1/dataset_g1_locomanip.hdf5 \
+--num_demos 5 --enable_pinocchio
+```
+### G1-Inspire
+```
+./isaaclab.sh -p scripts/tools/record_demos.py \
+--device cpu \
+--task Isaac-PickPlace-Locomanipulation-G1-Inspire-Abs-v0 \
+--teleop_device handtracking \
+--dataset_file ./datasets/locomanipu_G1/dataset_g1_locomanip.hdf5 \
+--num_demos 5 \
+--enable_pinocchio
+
+./isaaclab.sh -p scripts/tools/record_demos.py \
+--device cpu \
+--task Isaac-PickPlace-FixedBaseUpperBodyIK-G1-Inspire-Abs-v0 \
+--teleop_device handtracking \
+--dataset_file ./datasets/locomanipu_G1/dataset_g1_locomanip.hdf5 \
+--num_demos 5 \
+--enable_pinocchio
 
 ```
 
@@ -54,18 +78,18 @@
 - input dataset (--dataset) should be the manipulation dataset generated in the previous
 
 ```
-
 ./isaaclab.sh -p \
     scripts/imitation_learning/locomanipulation_sdg/generate_data.py \
     --device cpu \
     --kit_args="--enable isaacsim.replicator.mobility_gen" \
     --task="Isaac-G1-SteeringWheel-Locomanipulation" \
-    --dataset ./datasets/generated_dataset_g1_locomanip.hdf5 \
-    --num_runs 1 \
+    --dataset ./datasets/locomanipu_G1/dataset_annotated_g1_locomanip.hdf5 \
+    --num_runs 15 \
     --lift_step 60 \
     --navigate_step 130 \
     --enable_pinocchio \
-    --output_file ./datasets/generated_dataset_g1_locomanipulation_sdg.hdf5 \
+    --output_file ./datasets/locomanipu_G1/generated_dataset_g1_locomanipulation_sdg.hdf5 \
     --enable_cameras
+
 
 ```

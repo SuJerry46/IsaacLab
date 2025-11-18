@@ -124,3 +124,113 @@ The configuration includes:
 - Hand joint names for additional control
 - Reference to the pink IK controller configuration
 """
+
+##################################################
+# Pink IK Controller Configuration for G1 Inspire#
+##################################################
+
+G1_INSPIRE_UPPER_BODY_IK_CONTROLLER_CFG = PinkIKControllerCfg(
+    articulation_name="robot",
+    base_link_name="pelvis",
+    num_hand_joints=24,
+    show_ik_warnings=True,
+    fail_on_joint_limit_violation=False,
+    variable_input_tasks=[
+        LocalFrameTask(
+            "g1_29dof_rev_1_0_left_wrist_yaw_link",
+            base_link_frame_name="g1_29dof_rev_1_0",
+            position_cost=8.0,  # [cost] / [m]
+            orientation_cost=2.0,  # [cost] / [rad]
+            lm_damping=10,  # dampening for solver for step jumps
+            gain=0.5,
+        ),
+        LocalFrameTask(
+            "g1_29dof_rev_1_0_right_wrist_yaw_link",
+            base_link_frame_name="g1_29dof_rev_1_0",
+            position_cost=8.0,  # [cost] / [m]
+            orientation_cost=2.0,  # [cost] / [rad]
+            lm_damping=10,  # dampening for solver for step jumps
+            gain=0.5,
+        ),
+        NullSpacePostureTask(
+            cost=0.5,
+            lm_damping=1,
+            controlled_frames=[
+                "g1_29dof_rev_1_0_left_wrist_yaw_link",
+                "g1_29dof_rev_1_0_right_wrist_yaw_link",
+            ],
+            controlled_joints=[
+                "left_shoulder_pitch_joint",
+                "left_shoulder_roll_joint",
+                "left_shoulder_yaw_joint",
+                "right_shoulder_pitch_joint",
+                "right_shoulder_roll_joint",
+                "right_shoulder_yaw_joint",
+                "waist_yaw_joint",
+                "waist_pitch_joint",
+                "waist_roll_joint",
+            ],
+            gain=0.3,
+        ),
+    ],
+    fixed_input_tasks=[],
+)
+
+
+##
+# Pink IK Action Configuration for G1 Inspire
+##
+
+G1_INSPIRE_UPPER_BODY_IK_ACTION_CFG = PinkInverseKinematicsActionCfg(
+    pink_controlled_joint_names=[
+        ".*_shoulder_pitch_joint",
+        ".*_shoulder_roll_joint",
+        ".*_shoulder_yaw_joint",
+        ".*_elbow_joint",
+        ".*_wrist_pitch_joint",
+        ".*_wrist_roll_joint",
+        ".*_wrist_yaw_joint",
+        "waist_.*_joint",
+    ],
+    hand_joint_names=[
+        # All the drive and mimic joints, total 24 joints (5-finger Inspire hand)
+        "L_index_proximal_joint",
+        "L_middle_proximal_joint",
+        "L_pinky_proximal_joint",
+        "L_ring_proximal_joint",
+        "L_thumb_proximal_yaw_joint",
+
+        "R_index_proximal_joint",
+        "R_middle_proximal_joint",
+        "R_pinky_proximal_joint",
+        "R_ring_proximal_joint",
+        "R_thumb_proximal_yaw_joint",
+
+        "L_index_intermediate_joint",
+        "L_middle_intermediate_joint",
+        "L_pinky_intermediate_joint",
+        "L_ring_intermediate_joint",
+        "L_thumb_proximal_pitch_joint",
+
+        "R_index_intermediate_joint",
+        "R_middle_intermediate_joint",
+        "R_pinky_intermediate_joint",
+        "R_ring_intermediate_joint",
+        "R_thumb_proximal_pitch_joint",
+
+        "L_thumb_intermediate_joint",
+        "R_thumb_intermediate_joint",
+        "L_thumb_distal_joint",
+        "R_thumb_distal_joint",
+    ],
+    target_eef_link_names={
+        "left_wrist": "left_wrist_yaw_link",
+        "right_wrist": "right_wrist_yaw_link",
+    },
+    # the robot in the sim scene we are controlling
+    asset_name="robot",
+    # Configuration for the IK controller
+    # The frames names are the ones present in the URDF file
+    # The urdf has to be generated from the USD that is being used in the scene
+    controller=G1_INSPIRE_UPPER_BODY_IK_CONTROLLER_CFG,
+)

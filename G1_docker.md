@@ -8,14 +8,12 @@ docker run -d \
   -e "ACCEPT_EULA=Y" \
   nvcr.io/nvidia/cloudxr-runtime:5.0.1
 
-
-
 ```
-
 
 ## docker pull nvcr.io/nvidia/isaac-lab:2.3.0
 
 ```
+
 docker run -d \
   --gpus all \
   --network host \
@@ -39,6 +37,7 @@ docker exec -it isaac-lab-2.3 bash
 ./docker/container.py start \
     --files docker-compose.cloudxr-runtime.patch.yaml \
     --env-file .env.cloudxr-runtime
+    
 ```
 
 
